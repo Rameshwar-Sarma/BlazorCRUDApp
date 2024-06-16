@@ -1,0 +1,57 @@
+﻿@page "/EditProduct/{Id:int}"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using BlazorCRUDApp.Shared.Models
+@using Microsoft.AspNetCore.Components.Forms
+
+<h3>Edit Product</h3>
+
+@if (product == null)
+{
+    <p><em>No Product....</em></p>
+}
+else
+{
+    <EditForm Model="product" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="name">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="product.Name" />
+        </div>
+
+        <div class="form-group">
+            <label for="price">Price</label>
+            <InputNumber id="price" class="form-control" @bind-Value="product.Price" />
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <InputNumber id="quantity" class="form-control" @bind-Value="product.Quantity" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" >Save</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Product? product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await Http.GetFromJsonAsync<Product>($"api/products/{Id}");
+    }
+    private void Home()
+    {
+        Navigation.NavigateTo("/");
+    }
+    private async Task HandleValidSubmit()
+    {
+        await Http.PutAsJsonAsync($"api/products/{Id}", product);
+        Navigation.NavigateTo("/");
+    }
+}

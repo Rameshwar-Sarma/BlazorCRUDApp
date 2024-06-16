@@ -1,0 +1,67 @@
+﻿@page "/"
+@using BlazorCRUDApp.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<h3>Products List</h3>
+
+<button @onclick="AddItem">Add New Item</button>
+
+@if (products == null)
+{
+    <p><em>No Products</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in products)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Price</td>
+                    <td>@item.Quantity</td>
+                    <td>
+                        <button @onclick="() => EditItem(item.Id)">Edit</button>
+                        <button @onclick="() => DeleteItem(item.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Product> products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Http.GetFromJsonAsync<List<Product>>("api/products");
+    }
+
+    private void AddItem()
+    {
+        Navigation.NavigateTo("/AddProduct");
+    }
+
+    private void EditItem(int id)
+    {
+        Navigation.NavigateTo($"/EditProduct/{id}");
+    }
+
+    private async Task DeleteItem(int id)
+    {
+        await Http.DeleteAsync($"api/products/{id}");
+        products = await Http.GetFromJsonAsync<List<Product>>("api/products");
+    }
+}
